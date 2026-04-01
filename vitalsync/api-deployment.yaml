@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vitalsync-api-deployment
+  labels:
+    app: vitalsync-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vitalsync-api
+  template:
+    metadata:
+      labels:
+        app: vitalsync-api
+    spec:
+      containers:
+        - name: vitalsync-api
+          image: vitalsync-api:v1
+          imagePullPolicy: Never 
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: POSTGRES_DB
